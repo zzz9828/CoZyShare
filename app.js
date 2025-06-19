@@ -107,7 +107,7 @@ createBtn.onclick = async () => {
   const snap = await getDoc(ref);
   if (snap.exists()) {
     alert("Room ID already exists. Please choose another one.");
-    return; // ✅ 阻止进入 Broadcaster 页面
+    return;
   }
 
   await setDoc(ref, {
@@ -120,10 +120,8 @@ createBtn.onclick = async () => {
   roomSec.style.display = "none";
   broadcasterSec.style.display = "block";
 
-  // ✅ 显示房间号
   document.getElementById("broadcaster-room-id").textContent = roomId;
 
-  // ✅ 实时监听观众人数
   const roomRef = doc(db, "rooms", roomId);
   onSnapshot(roomRef, snap => {
     const data = snap.data();
@@ -132,21 +130,14 @@ createBtn.onclick = async () => {
     }
   });
 
-  // ✅ 监听页面关闭，自动清理房间
-  window.addEventListener("beforeunload", async (event) => {
-    try {
-      await clearSignals(roomId); // 删除 signals 子集合
-      await deleteDoc(doc(db, "rooms", roomId)); // 删除房间文档
-    } catch (e) {
-      console.warn("Failed to clean up room on unload:", e);
-    }
-  }); // ✅ 关闭 window.addEventListener 的圆括号和大括号
+  // ✅ 使用非 async 回调，避免语法错误
+  window.addEventListener("beforeunload", () => {
+    clearSignals(roomId).catch(console.warn);
+    deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
+  });
 
-  // ✅ 启动推流
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
-}; // ✅ 关闭 createBtn.onclick 的大括号
-
-
+};
 
 
 // Join room
