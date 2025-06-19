@@ -10,7 +10,7 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-import { db } from "../firebase.js"; // ✅ 确保路径大小写和 GitHub 上一致！
+import { db } from "../firebase.js"; // ✅ 不再引入 app，只使用 db
 
 export async function sendSignal(roomId, type, payload, from) {
   const col = collection(db, "rooms", roomId, "signals");
