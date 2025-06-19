@@ -72,3 +72,17 @@ video {
 .fade-in { animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
 @keyframes fadeInVideo { from{opacity:0;} to{opacity:1;} }
+
+.status {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.status.success {
+  color: green;
+}
+
+.status.error {
+  color: red;
+}
