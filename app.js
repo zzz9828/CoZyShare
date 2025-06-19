@@ -96,7 +96,6 @@ onAuthStateChanged(auth, u => {
   }
 });
 
-// Create room
 createBtn.onclick = async () => {
   roomId = roomIdInput.value.trim();
   if (!roomId) return alert("Enter ID");
@@ -133,8 +132,6 @@ createBtn.onclick = async () => {
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
 
-  stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
-};
 
 // Join room
 joinBtn.onclick = async () => {
