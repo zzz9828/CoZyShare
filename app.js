@@ -132,6 +132,15 @@ createBtn.onclick = async () => {
     }
   });
 
+  // ✅ 监听页面关闭，自动清理房间
+  window.addEventListener("beforeunload", async (event) => {
+    try {
+      await clearSignals(roomId); // 删除 signals 子集合
+      await deleteDoc(doc(db, "rooms", roomId)); // 删除房间文档
+    } catch (e) {
+      console.warn("Failed to clean up room on unload:", e);
+    }
+
   // ✅ 启动推流
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
