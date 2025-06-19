@@ -140,10 +140,12 @@ createBtn.onclick = async () => {
     } catch (e) {
       console.warn("Failed to clean up room on unload:", e);
     }
+  }); // ✅ 关闭 window.addEventListener 的圆括号和大括号
 
   // ✅ 启动推流
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
-};
+}; // ✅ 关闭 createBtn.onclick 的大括号
+
 
 
 
