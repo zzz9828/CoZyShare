@@ -1,6 +1,7 @@
 # CoZyShare
 
 **CoZyShare** is a real-time screen sharing web application built with Firebase and JavaScript. It allows a broadcaster to share their screen with multiple viewers in a room with a unique ID.
+**Reminder** Mainland China users need VPN to get access.
 
 ---
 
