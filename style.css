@@ -86,11 +86,15 @@ video {
 .status.error {
   color: red;
 }
-
-#broadcaster-info {
-  font-size: 14px;
-  margin-bottom: 10px;
-}
 #broadcaster-info p {
   margin: 2px 0;
 }
+
+#broadcaster-info {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  background: #f0f0f0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
