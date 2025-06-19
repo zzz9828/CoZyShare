@@ -51,16 +51,33 @@ logoutBtn.onclick = async () => {
 // Login/Register
 loginForm.addEventListener("submit", async e => {
   e.preventDefault();
-  const em = document.getElementById("email").value;
+  const em = document.getElementById("email").value.trim();
   const pw = document.getElementById("password").value;
+
+  loginStatus.textContent = "Logging in...";
+  loginStatus.className = "status";
+
   try {
     const cu = await signInWithEmailAndPassword(auth, em, pw);
     user = cu.user;
-  } catch {
-    const cu = await createUserWithEmailAndPassword(auth, em, pw);
-    user = cu.user;
+    loginStatus.textContent = "Login successful!";
+    loginStatus.classList.add("success");
+  } catch (loginErr) {
+    // 如果登录失败，尝试注册
+    try {
+      const cu = await createUserWithEmailAndPassword(auth, em, pw);
+      user = cu.user;
+      loginStatus.textContent = "Registered and logged in successfully!";
+      loginStatus.classList.add("success");
+    } catch (regErr) {
+      const msg = getFriendlyAuthError(regErr);
+      loginStatus.textContent = msg;
+      loginStatus.className = "status error";
+      alert(msg); // 弹窗提示
+    }
   }
 });
+
 
 // Auth state
 onAuthStateChanged(auth, u => {
