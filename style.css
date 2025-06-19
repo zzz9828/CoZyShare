@@ -86,3 +86,11 @@ video {
 .status.error {
   color: red;
 }
+
+#broadcaster-info {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+#broadcaster-info p {
+  margin: 2px 0;
+}
