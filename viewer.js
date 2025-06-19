@@ -11,6 +11,10 @@ export async function setupViewer(roomId, userId, container) {
     ]
   });
 
+  // ICE candidate 缓存队列，等待 remoteDescription 设置好后再添加
+  const iceQueue = [];
+  let remoteDescSet = false;
+
   // 2. 先订阅信令，这样能收到房主已发送的 offer/ice
   const unsub = listenSignals(roomId, async (data) => {
     if (data.from === userId) return; // 忽略自己发出的
@@ -18,6 +22,18 @@ export async function setupViewer(roomId, userId, container) {
     if (data.type === "offer") {
       // 收到房主的 offer -> 设置远端描述并创建 answer
       await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+      remoteDescSet = true;
+
+      // 处理之前缓存的 ICE candidate
+      for (const c of iceQueue) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(c));
+        } catch (e) {
+          console.warn("Error adding remote ICE candidate from queue:", e);
+        }
+      }
+      iceQueue.length = 0; // 清空队列
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       // 发送 answer 回房主
@@ -25,10 +41,15 @@ export async function setupViewer(roomId, userId, container) {
 
     } else if (data.type === "ice") {
       // 收到房主的 ICE candidate
-      try {
-        await pc.addIceCandidate(data.payload);
-      } catch (e) {
-        console.warn("Error adding remote ICE candidate:", e);
+      if (remoteDescSet) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(data.payload));
+        } catch (e) {
+          console.warn("Error adding remote ICE candidate:", e);
+        }
+      } else {
+        // remoteDescription 未设置，先缓存 ICE candidate
+        iceQueue.push(data.payload);
       }
     }
   });
