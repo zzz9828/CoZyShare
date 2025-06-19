@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CoZyShare</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>CoZyShare</h1>
+    <button id="logoutBtn" class="btn secondary" style="display:none;">Logout</button>
+  </header>
+  <main id="app" class="fade-in">
+
+    <section id="login-section">
+      <h2>Login / Register</h2>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required autocomplete="email" />
+        <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+        <button type="submit" class="btn">Login / Register</button>
+      </form>
+      <p id="login-status" class="status"></p>
+    </section>
+
+    <section id="room-section" style="display:none;">
+      <h2>Create or Join Room</h2>
+      <input type="text" id="roomIdInput" placeholder="Room ID" />
+      <div class="row">
+        <button id="createRoomBtn" class="btn">Create Room</button>
+        <button id="joinRoomBtn" class="btn">Join Room</button>
+      </div>
+      <p id="room-status" class="status"></p>
+    </section>
+
+    <section id="broadcaster-section" style="display:none;">
+      <h2>Broadcaster</h2>
+      <video id="localVideo" autoplay muted playsinline></video>
+      <button id="stopStreamBtn" class="btn secondary">Stop Sharing</button>
+    </section>
+
+    <section id="viewer-section" style="display:none;">
+      <h2>Viewer</h2>
+      <div id="video-container"></div>
+      <button id="leaveRoomBtn" class="btn secondary">Leave Room</button>
+    </section>
+
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

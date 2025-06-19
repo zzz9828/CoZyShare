@@ -1,0 +1,74 @@
+/* style.css */
+:root {
+  --blue: #007aff;
+  --gray: #888;
+  --bg: #f2f2f7;
+  --white: #fff;
+}
+
+* { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: #333;
+}
+
+.header {
+  background: var(--white);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+h1 { font-size: 1.5rem; }
+
+main { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+
+h2 { margin-bottom: 1rem; }
+
+input {
+  width: 100%; padding: 0.75rem; margin-bottom: 1rem;
+  border: 1px solid var(--gray); border-radius: 8px;
+  transition: border-color 0.3s;
+}
+input:focus { border-color: var(--blue); outline: none; }
+
+.btn {
+  display: inline-block; padding: 0.75rem 1.5rem;
+  background: var(--blue); color: var(--white); border:none; border-radius: 8px;
+  font-size: 1rem; cursor: pointer; transition: background 0.3s, transform 0.2s;
+}
+.btn:hover { background: #0051c7; transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+.btn.secondary {
+  background: var(--white); color: var(--blue);
+  border: 1px solid var(--blue);
+}
+.btn.secondary:hover { background: var(--blue); color: var(--white); }
+
+.row { display: flex; gap: 1rem; }
+
+.status { margin-top: 0.5rem; color: var(--gray); min-height:1.2rem; }
+
+video {
+  width: 100%; border-radius: 12px; background: black;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+  animation: fadeInVideo 0.5s ease;
+}
+
+#video-container { position: relative; }
+
+.watermark {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(0,0,0,0.4); color: #fff; padding: 4px 8px;
+  border-radius: 4px; font-size: 0.8rem;
+}
+
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+@keyframes fadeInVideo { from{opacity:0;} to{opacity:1;} }
