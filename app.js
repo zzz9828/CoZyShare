@@ -171,7 +171,7 @@ function getFriendlyAuthError(error) {
     case "auth/invalid-email":
       return "Invalid email format.";
     case "auth/email-already-in-use":
-      return "This email is already registered.";
+      return "This email is already registered, or the password is incorrect.";
     case "auth/user-not-found":
       return "User not found.";
     case "auth/wrong-password":
