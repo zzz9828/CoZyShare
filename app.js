@@ -3,9 +3,21 @@ import { auth, db } from "./firebase.js";
 import { setupBroadcaster } from "./broadcaster.js";
 import { setupViewer } from "./viewer.js";
 import { sendSignal, listenSignals, clearSignals } from "./utils/signaling.js";
-import { doc, getDoc, setDoc, updateDoc, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
+  runTransaction,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
 // Elements
 const logoutBtn=document.getElementById("logoutBtn");
