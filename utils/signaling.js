@@ -1,7 +1,16 @@
 // utils/signaling.js
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-import { app } from "../firebase.js";
-const db = getFirestore(app);
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  getDocs,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+import { db } from "../firebase.js"; // ✅ 确保路径大小写和 GitHub 上一致！
 
 export async function sendSignal(roomId, type, payload, from) {
   const col = collection(db, "rooms", roomId, "signals");
@@ -21,5 +30,7 @@ export function listenSignals(roomId, callback) {
 export async function clearSignals(roomId) {
   const col = collection(db, "rooms", roomId, "signals");
   const snaps = await getDocs(col);
-  for (const docSnap of snaps.docs) await deleteDoc(docSnap.ref);
+  for (const docSnap of snaps.docs) {
+    await deleteDoc(docSnap.ref);
+  }
 }
