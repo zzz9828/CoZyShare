@@ -162,16 +162,24 @@ joinBtn.onclick = async () => {
   }
 };
 
-// Stop share
-stopBtn.onclick = () => {
+stopBtn.onclick = async () => {
   if (stopBroad) {
     stopBroad();
     clearSignals(roomId);
-    deleteDoc(doc(db, "rooms", roomId)); // 释放房间 ID
+
+    try {
+      console.log("Attempting to delete room:", roomId);
+      await deleteDoc(doc(db, "rooms", roomId));
+      console.log("Room deleted successfully.");
+    } catch (e) {
+      console.error("Error deleting room:", e);
+    }
   }
+
   broadcasterSec.style.display = "none";
   roomSec.style.display = "block";
 };
+
 
 // Leave viewer
 leaveBtn.onclick = async () => {
