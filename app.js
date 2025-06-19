@@ -147,3 +147,25 @@ leaveBtn.onclick = async () => {
   viewerSec.style.display = "none";
   roomSec.style.display = "block";
 };
+
+function getFriendlyAuthError(error) {
+  const code = error.code || "";
+  switch (code) {
+    case "auth/invalid-email":
+      return "Invalid email format.";
+    case "auth/email-already-in-use":
+      return "This email is already registered.";
+    case "auth/user-not-found":
+      return "User not found.";
+    case "auth/wrong-password":
+      return "Incorrect password.";
+    case "auth/weak-password":
+      return "Password should be at least 6 characters.";
+    case "auth/missing-password":
+      return "Please enter a password.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please try again later.";
+    default:
+      return "Authentication error. " + (error.message || "");
+  }
+}
