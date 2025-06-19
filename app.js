@@ -96,6 +96,7 @@ onAuthStateChanged(auth, u => {
   }
 });
 
+// Create room
 createBtn.onclick = async () => {
   roomId = roomIdInput.value.trim();
   if (!roomId) return alert("Enter ID");
@@ -104,7 +105,10 @@ createBtn.onclick = async () => {
 
   const ref = doc(db, "rooms", roomId);
   const snap = await getDoc(ref);
-  if (snap.exists()) return alert("Room ID exists");
+  if (snap.exists()) {
+    alert("Room ID already exists. Please choose another one.");
+    return; // ✅ 阻止进入 Broadcaster 页面
+  }
 
   await setDoc(ref, {
     ownerId: user.uid,
@@ -131,6 +135,7 @@ createBtn.onclick = async () => {
   // ✅ 启动推流
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
+
 
 
 // Join room
