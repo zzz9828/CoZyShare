@@ -12,7 +12,8 @@ import {
   updateDoc,
   increment,
   runTransaction,
-  deleteDoc
+  deleteDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 import {
@@ -115,6 +116,23 @@ createBtn.onclick = async () => {
 
   roomSec.style.display = "none";
   broadcasterSec.style.display = "block";
+
+  // ✅ 显示房间号
+  document.getElementById("broadcaster-room-id").textContent = roomId;
+
+  // ✅ 实时监听观众人数
+  const roomRef = doc(db, "rooms", roomId);
+  onSnapshot(roomRef, snap => {
+    const data = snap.data();
+    if (data && typeof data.currentViewers === "number") {
+      document.getElementById("viewer-count").textContent = data.currentViewers;
+    }
+  });
+
+  // ✅ 启动推流
+  stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
+};
+
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
 
