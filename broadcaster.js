@@ -9,24 +9,20 @@ export async function setupBroadcaster(roomId, userId, videoEl) {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
   });
 
-  // 添加媒体流 track
   stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-  // ICE Candidate 处理
   pc.onicecandidate = e => {
     if (e.candidate) {
       sendSignal(roomId, "ice", e.candidate.toJSON(), userId);
     }
   };
 
-  // 创建 offer 并设置本地描述
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  // ❗关键：直接传 offer，不要 .toJSON()
+  // ✅ 不需要 toJSON
   await sendSignal(roomId, "offer", offer, userId);
 
-  // 接收 viewer 返回的 answer
   const unsub = listenSignals(roomId, async data => {
     if (data.from === userId) return;
 
@@ -36,12 +32,11 @@ export async function setupBroadcaster(roomId, userId, videoEl) {
       try {
         await pc.addIceCandidate(data.payload);
       } catch (err) {
-        console.warn("Error adding remote ICE candidate:", err);
+        console.warn("Error adding ICE candidate:", err);
       }
     }
   });
 
-  // 返回清理函数
   return () => {
     unsub();
     pc.close();
