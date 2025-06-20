@@ -4,6 +4,9 @@ import { sendSignal, listenSignals } from "./utils/signaling.js";
 export async function setupBroadcaster(roomId, userId, videoEl) {
   const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
   videoEl.srcObject = stream;
+  videoEl.muted = true;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
 
   const pc = new RTCPeerConnection({
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
@@ -20,8 +23,22 @@ export async function setupBroadcaster(roomId, userId, videoEl) {
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  // ✅ 不需要 toJSON
-  await sendSignal(roomId, "offer", offer, userId);
+  // ✅ 等 ICE 完整之后再发送 offer
+  await new Promise(resolve => {
+    if (pc.iceGatheringState === "complete") {
+      resolve();
+    } else {
+      const check = () => {
+        if (pc.iceGatheringState === "complete") {
+          pc.removeEventListener("icegatheringstatechange", check);
+          resolve();
+        }
+      };
+      pc.addEventListener("icegatheringstatechange", check);
+    }
+  });
+
+  await sendSignal(roomId, "offer", pc.localDescription, userId);
 
   const unsub = listenSignals(roomId, async data => {
     if (data.from === userId) return;
@@ -43,3 +60,4 @@ export async function setupBroadcaster(roomId, userId, videoEl) {
     stream.getTracks().forEach(t => t.stop());
   };
 }
+
