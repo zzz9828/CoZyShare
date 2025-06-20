@@ -4,6 +4,7 @@ import { setupBroadcaster } from "./broadcaster.js";
 import { setupViewer } from "./viewer.js";
 import { sendSignal, listenSignals, clearSignals } from "./utils/signaling.js";
 
+// 只从官方 CDN 导入 Firestore 和 Auth API
 import {
   doc,
   getDoc,
@@ -22,6 +23,9 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
+// 下面是你的业务代码...
+
+// Elements
 const logoutBtn = document.getElementById("logoutBtn");
 const loginSec = document.getElementById("login-section");
 const loginForm = document.getElementById("loginForm");
@@ -40,10 +44,12 @@ const leaveBtn = document.getElementById("leaveRoomBtn");
 
 let user, roomId, stopBroad, stopView;
 
+// Logout
 logoutBtn.onclick = async () => {
   await signOut(auth);
 };
 
+// Login/Register
 loginForm.addEventListener("submit", async e => {
   e.preventDefault();
   const em = document.getElementById("email").value.trim();
@@ -58,6 +64,7 @@ loginForm.addEventListener("submit", async e => {
     loginStatus.textContent = "Login successful!";
     loginStatus.classList.add("success");
   } catch (loginErr) {
+    // 如果登录失败，尝试注册
     try {
       const cu = await createUserWithEmailAndPassword(auth, em, pw);
       user = cu.user;
@@ -67,11 +74,13 @@ loginForm.addEventListener("submit", async e => {
       const msg = getFriendlyAuthError(regErr);
       loginStatus.textContent = msg;
       loginStatus.className = "status error";
-      alert(msg);
+      alert(msg); // 弹窗提示
     }
   }
 });
 
+
+// Auth state
 onAuthStateChanged(auth, u => {
   user = u;
   if (user) {
@@ -87,11 +96,13 @@ onAuthStateChanged(auth, u => {
   }
 });
 
+// Create room
 createBtn.onclick = async () => {
   roomId = roomIdInput.value.trim();
   if (!roomId) return alert("Enter ID");
 
   const lim = parseInt(seatLimitInput.value, 10) || 50;
+
   const ref = doc(db, "rooms", roomId);
   const snap = await getDoc(ref);
   if (snap.exists()) {
@@ -115,18 +126,21 @@ createBtn.onclick = async () => {
   onSnapshot(roomRef, snap => {
     const data = snap.data();
     if (data && typeof data.currentViewers === "number") {
-      document.getElementById("viewer-count").textContent = Math.max(0, data.currentViewers - 1);
+      document.getElementById("viewer-count").textContent = data.currentViewers;
     }
   });
 
+  // ✅ 使用非 async 回调，避免语法错误
   window.addEventListener("beforeunload", () => {
-    clearSignals(roomId).catch(console.warn);
-    deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
-  });
+  clearSignals(roomId).catch(console.warn);
+  deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
+});
 
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
 
+
+// Join room
 joinBtn.onclick = async () => {
   roomId = roomIdInput.value.trim();
   if (!roomId) return alert("Enter ID");
@@ -145,16 +159,6 @@ joinBtn.onclick = async () => {
     roomSec.style.display = "none";
     viewerSec.style.display = "block";
     stopView = await setupViewer(roomId, user.uid, videoContain);
-
-    window.addEventListener("beforeunload", async () => {
-      await runTransaction(db, async tr => {
-        const r = await tr.get(ref);
-        if (r.data().currentViewers > 0) {
-          tr.update(ref, { currentViewers: increment(-1) });
-        }
-      });
-    });
-
   } catch (e) {
     alert(e);
   }
@@ -164,33 +168,27 @@ stopBtn.onclick = async () => {
   if (stopBroad) {
     stopBroad();
     clearSignals(roomId);
+
     try {
-      const snap = await getDoc(doc(db, "rooms", roomId));
-      const data = snap.data();
-      if (data.currentViewers <= 1) {
-        await deleteDoc(doc(db, "rooms", roomId));
-      }
+      console.log("Host leaving. Deleting room:", roomId);
+      await deleteDoc(doc(db, "rooms", roomId));
     } catch (e) {
       console.error("Error deleting room:", e);
     }
   }
+
   broadcasterSec.style.display = "none";
   roomSec.style.display = "block";
 };
 
+
+
+// Leave viewer
 leaveBtn.onclick = async () => {
   if (!roomId) return;
-  const ref = doc(db, "rooms", roomId);
   await runTransaction(db, async tr => {
-    const r = await tr.get(ref);
-    const data = r.data();
-    const current = data.currentViewers;
-    if (current > 0) {
-      tr.update(ref, { currentViewers: increment(-1) });
-    }
-    if (current === 1 && data.ownerId !== user.uid) {
-      await deleteDoc(ref);
-    }
+    const r = await tr.get(doc(db, "rooms", roomId));
+    if (r.data().currentViewers > 0) tr.update(doc(db, "rooms", roomId), { currentViewers: increment(-1) });
   });
   if (stopView) stopView();
   viewerSec.style.display = "none";
