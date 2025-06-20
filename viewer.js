@@ -6,22 +6,39 @@ export async function setupViewer(roomId, userId, container) {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
   });
 
-  // 📌 先订阅信令，避免抢在 offer 前设置 ICE
+  let hasRemoteDesc = false;
+  const pendingCandidates = [];
+
   const unsub = listenSignals(roomId, async (data) => {
     if (data.from === userId) return;
 
     if (data.type === "offer") {
       await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+      hasRemoteDesc = true;
+
+      // 🧊 添加所有之前缓存的 ICE 候选
+      for (const candidate of pendingCandidates) {
+        try {
+          await pc.addIceCandidate(candidate);
+        } catch (e) {
+          console.warn("Error applying buffered ICE:", e);
+        }
+      }
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-
-      // ✅ 不需要 toJSON
       await sendSignal(roomId, "answer", answer, userId);
-    } else if (data.type === "ice") {
-      try {
-        await pc.addIceCandidate(data.payload);
-      } catch (e) {
-        console.warn("Error adding remote ICE candidate:", e);
+    }
+
+    else if (data.type === "ice") {
+      if (!hasRemoteDesc) {
+        pendingCandidates.push(data.payload); // ⏳ 缓存 ICE
+      } else {
+        try {
+          await pc.addIceCandidate(data.payload);
+        } catch (e) {
+          console.warn("Error adding remote ICE candidate:", e);
+        }
       }
     }
   });
@@ -50,7 +67,6 @@ export async function setupViewer(roomId, userId, container) {
 
     wrapper.appendChild(video);
     wrapper.appendChild(watermark);
-
     container.appendChild(wrapper);
   };
 
