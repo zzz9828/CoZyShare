@@ -4,7 +4,7 @@ import { setupBroadcaster } from "./broadcaster.js";
 import { setupViewer } from "./viewer.js";
 import { sendSignal, listenSignals, clearSignals } from "./utils/signaling.js";
 
-// Firebase imports
+// 只从官方 CDN 导入 Firestore 和 Auth API
 import {
   doc,
   getDoc,
@@ -22,6 +22,8 @@ import {
   createUserWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+
+// 下面是你的业务代码...
 
 // Elements
 const logoutBtn = document.getElementById("logoutBtn");
@@ -41,13 +43,6 @@ const videoContain = document.getElementById("video-container");
 const leaveBtn = document.getElementById("leaveRoomBtn");
 
 let user, roomId, stopBroad, stopView;
-
-// Mobile device detection
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-if (isMobile) {
-  createBtn.disabled = true;
-  createBtn.title = "Screen sharing is not supported on mobile devices.";
-}
 
 // Logout
 logoutBtn.onclick = async () => {
@@ -69,6 +64,7 @@ loginForm.addEventListener("submit", async e => {
     loginStatus.textContent = "Login successful!";
     loginStatus.classList.add("success");
   } catch (loginErr) {
+    // 如果登录失败，尝试注册
     try {
       const cu = await createUserWithEmailAndPassword(auth, em, pw);
       user = cu.user;
@@ -78,10 +74,11 @@ loginForm.addEventListener("submit", async e => {
       const msg = getFriendlyAuthError(regErr);
       loginStatus.textContent = msg;
       loginStatus.className = "status error";
-      alert(msg);
+      alert(msg); // 弹窗提示
     }
   }
 });
+
 
 // Auth state
 onAuthStateChanged(auth, u => {
@@ -133,17 +130,15 @@ createBtn.onclick = async () => {
     }
   });
 
-  window.addEventListener("beforeunload", async () => {
-    try {
-      await clearSignals(roomId);
-      await deleteDoc(doc(db, "rooms", roomId));
-    } catch (e) {
-      console.warn("Failed to clean up room on unload:", e);
-    }
+  // ✅ 使用非 async 回调，避免语法错误
+  window.addEventListener("beforeunload", () => {
+    clearSignals(roomId).catch(console.warn);
+    deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
   });
 
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
+
 
 // Join room
 joinBtn.onclick = async () => {
@@ -173,27 +168,27 @@ stopBtn.onclick = async () => {
   if (stopBroad) {
     stopBroad();
     clearSignals(roomId);
+
     try {
+      console.log("Attempting to delete room:", roomId);
       await deleteDoc(doc(db, "rooms", roomId));
+      console.log("Room deleted successfully.");
     } catch (e) {
       console.error("Error deleting room:", e);
     }
   }
+
   broadcasterSec.style.display = "none";
   roomSec.style.display = "block";
 };
 
+
+// Leave viewer
 leaveBtn.onclick = async () => {
   if (!roomId) return;
   await runTransaction(db, async tr => {
     const r = await tr.get(doc(db, "rooms", roomId));
-    const current = r.data().currentViewers;
-    if (current > 0) {
-      tr.update(doc(db, "rooms", roomId), { currentViewers: increment(-1) });
-    }
-    if (current === 1) {
-      await deleteDoc(doc(db, "rooms", roomId));
-    }
+    if (r.data().currentViewers > 0) tr.update(doc(db, "rooms", roomId), { currentViewers: increment(-1) });
   });
   if (stopView) stopView();
   viewerSec.style.display = "none";
