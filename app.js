@@ -132,9 +132,9 @@ createBtn.onclick = async () => {
 
   // ✅ 使用非 async 回调，避免语法错误
   window.addEventListener("beforeunload", () => {
-  clearSignals(roomId).catch(console.warn);
-  deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
-});
+    clearSignals(roomId).catch(console.warn);
+    deleteDoc(doc(db, "rooms", roomId)).catch(console.warn);
+  });
 
   stopBroad = await setupBroadcaster(roomId, user.uid, localVideo);
 };
@@ -170,8 +170,9 @@ stopBtn.onclick = async () => {
     clearSignals(roomId);
 
     try {
-      console.log("Host leaving. Deleting room:", roomId);
+      console.log("Attempting to delete room:", roomId);
       await deleteDoc(doc(db, "rooms", roomId));
+      console.log("Room deleted successfully.");
     } catch (e) {
       console.error("Error deleting room:", e);
     }
@@ -180,7 +181,6 @@ stopBtn.onclick = async () => {
   broadcasterSec.style.display = "none";
   roomSec.style.display = "block";
 };
-
 
 
 // Leave viewer
